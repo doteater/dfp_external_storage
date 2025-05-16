@@ -520,6 +520,17 @@ class DFPExternalStorageFile(File):
 			frappe.log_error(title=f"{error_msg}: {self.file_name}")
 			frappe.throw(error_msg)
 
+	def validate(self):
+		localpattern = re.compile('^\/(private|public)\/')
+		remotepattern = re.compile('^\/file\/\S{10}\/')
+		if localpattern.match(self.file_url):
+			super(DFPExternalStorageFile, self).validate()
+		elif remotepattern.match(self.file_url):
+			return True
+		else:
+			frappe.log_error(title='DFPExternalStorageFile Validate', message=f'File URL {self.file_url} is invalid')
+			frappe.throw(_(f"Invalid file path {self.file_url}").format(file_path))
+
 	def validate_file_on_disk(self):
 		return True if self.dfp_is_s3_remote_file() else super(DFPExternalStorageFile, self).validate_file_on_disk()
 
