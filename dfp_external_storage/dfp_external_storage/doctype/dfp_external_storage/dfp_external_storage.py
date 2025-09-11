@@ -531,6 +531,12 @@ class DFPExternalStorageFile(File):
 			frappe.log_error(title='DFPExternalStorageFile Validate', message=f'File URL {self.file_url} is invalid')
 			frappe.throw(_(f"Invalid file path {self.file_url}").format(file_path))
 
+	def check_content(self):
+		# Skip content validation for external storage files
+	    if not self.file_url.startswith(('/private/', '/public/')):
+	        return
+	    super().check_content()
+
 	def validate_file_on_disk(self):
 		return True if self.dfp_is_s3_remote_file() else super(DFPExternalStorageFile, self).validate_file_on_disk()
 
