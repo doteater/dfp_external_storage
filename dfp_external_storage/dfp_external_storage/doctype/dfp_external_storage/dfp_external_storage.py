@@ -521,29 +521,29 @@ class DFPExternalStorageFile(File):
 			frappe.throw(error_msg)
 
 	def validate(self):
-    # Determine the current actual state of the file for validation purposes
-    if self._is_moving_to_external():
-        # File is being moved TO external storage, but it's currently still local
-        # So validate it as a local file
-        frappe.log_error("DFP Validation", "File being moved to external - validating as current local file")
-        super(DFPExternalStorageFile, self).validate()
-        return
-    
-    elif self._is_moving_to_local():
-        # File is being moved back to local storage, but it's currently external
-        # So skip content validation since content isn't available yet
-        frappe.log_error("DFP Validation", "File being moved to local - skipping content validation")
-        self.validate_minimal()
-        return
-    
-    elif self.dfp_external_storage:
-        # File is currently external and staying external
-        self.validate_external_file()
-        return
-    
-    else:
-        # File is currently local and staying local
-        super(DFPExternalStorageFile, self).validate()
+	    # Determine the current actual state of the file for validation purposes
+	    if self._is_moving_to_external():
+	        # File is being moved TO external storage, but it's currently still local
+	        # So validate it as a local file
+	        frappe.log_error("DFP Validation", "File being moved to external - validating as current local file")
+	        super(DFPExternalStorageFile, self).validate()
+	        return
+	    
+	    elif self._is_moving_to_local():
+	        # File is being moved back to local storage, but it's currently external
+	        # So skip content validation since content isn't available yet
+	        frappe.log_error("DFP Validation", "File being moved to local - skipping content validation")
+	        self.validate_minimal()
+	        return
+	    
+	    elif self.dfp_external_storage:
+	        # File is currently external and staying external
+	        self.validate_external_file()
+	        return
+	    
+	    else:
+	        # File is currently local and staying local
+	        super(DFPExternalStorageFile, self).validate()
 
 	def _is_moving_to_external(self):
 	    """File is being moved FROM local TO external storage"""
