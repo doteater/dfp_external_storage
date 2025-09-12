@@ -521,19 +521,73 @@ class DFPExternalStorageFile(File):
 			frappe.throw(error_msg)
 
 	def validate(self):
-	    if self.file_url and self.file_url.startswith(('/private/', '/public/')):
-	        super(DFPExternalStorageFile, self).validate()
-	    else:
-	        self.validate_external_file()
+    # Determine the current actual state of the file for validation purposes
+    if self._is_moving_to_external():
+        # File is being moved TO external storage, but it's currently still local
+        # So validate it as a local file
+        frappe.log_error("DFP Validation", "File being moved to external - validating as current local file")
+        super(DFPExternalStorageFile, self).validate()
+        return
+    
+    elif self._is_moving_to_local():
+        # File is being moved back to local storage, but it's currently external
+        # So skip content validation since content isn't available yet
+        frappe.log_error("DFP Validation", "File being moved to local - skipping content validation")
+        self.validate_minimal()
+        return
+    
+    elif self.dfp_external_storage:
+        # File is currently external and staying external
+        self.validate_external_file()
+        return
+    
+    else:
+        # File is currently local and staying local
+        super(DFPExternalStorageFile, self).validate()
+
+	def _is_moving_to_external(self):
+	    """File is being moved FROM local TO external storage"""
+	    if not self.dfp_external_storage or self.is_new():
+	        return False
+	    
+	    if self.has_value_changed('dfp_external_storage'):
+	        old_external = self.get_value_before_save('dfp_external_storage')
+	        return not old_external and self.dfp_external_storage
+	    
+	    return False
+	
+	def _is_moving_to_local(self):
+	    """File is being moved FROM external TO local storage"""
+	    if self.is_new():
+	        return False
+	    
+	    if self.has_value_changed('dfp_external_storage'):
+	        old_external = self.get_value_before_save('dfp_external_storage')
+	        return old_external and not self.dfp_external_storage
+	    
+	    return False
+	
+	def validate_minimal(self):
+	    """Basic validation without content checks"""
+	    if not self.file_url:
+	        frappe.throw(_("File URL is required"))
 	
 	def validate_external_file(self):
+	    """Validation for files that are currently external"""
 	    if not self.file_url:
 	        frappe.throw(_("File URL is required for external storage"))
-
+	
 	def check_content(self):
-		# Skip content validation for external storage files
-	    if not self.file_url or not self.file_url.startswith(('/private/', '/public/')):
+	    """Override content validation"""
+	    if self._is_moving_to_local():
+	        # File is being moved back to local, content not available yet
 	        return
+	    elif self.dfp_external_storage and not self._is_moving_to_external():
+	        # File is currently external (and not being moved), no content available
+	        return
+	    
+	    # File is currently local (either staying local or being moved to external)
+	    # In both cases, content should be available for validation
 	    super(DFPExternalStorageFile, self).check_content()
 
 	def validate_file_on_disk(self):
