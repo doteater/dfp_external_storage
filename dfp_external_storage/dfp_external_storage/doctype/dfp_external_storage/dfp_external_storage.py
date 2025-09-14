@@ -1,4 +1,3 @@
-
 import os
 import re
 import io
@@ -521,7 +520,7 @@ class DFPExternalStorageFile(File):
 			frappe.throw(error_msg)
 
 	def validate(self):
-        return True if self.dfp_is_s3_remote_file() else super(DFPExternalStorageFile, self).validate()
+		return True if self.dfp_is_s3_remote_file() else super(DFPExternalStorageFile, self).validate()
 
 	def validate_file_on_disk(self):
 		return True if self.dfp_is_s3_remote_file() else super(DFPExternalStorageFile, self).validate_file_on_disk()
