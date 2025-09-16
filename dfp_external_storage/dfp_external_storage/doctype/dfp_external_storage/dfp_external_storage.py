@@ -406,9 +406,10 @@ class DFPExternalStorageFile(File):
         if self.dfp_external_storage_s3_key:
             # File already on S3
             return False
-        if self.file_url and self.file_url.startswith(URL_PREFIXES):
-            # frappe.throw(_("Not implemented save http(s)://file(s) to local."))
-            raise NotImplementedError("http(s)://file(s) not ready to be saved to local or external storage(s).")
+        #we don't care about clobbering http* file_urls    
+        ##if self.file_url and self.file_url.startswith(URL_PREFIXES):
+        ##    # frappe.throw(_("Not implemented save http(s)://file(s) to local."))
+        ##    raise NotImplementedError("http(s)://file(s) not ready to be saved to local or external storage(s).")
 
         original_file_url = self.file_url
 
