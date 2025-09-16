@@ -332,21 +332,37 @@ class DFPExternalStorageFile(File):
 
     def dfp_is_s3_remote_file(self):
         # checking s3 key and external storage doc seems to work for brand new files?
-        frappe.log_error(f"DFP IS S3, self: {self} bool(self): {bool(self)} self.dfp_external_storage: {self.dfp_external_storage}")
+        frappe.log_error(f"DFP IS S3? START", f"self: {self} bool(self): {bool(self)} self.dfp_external_storage: {self.dfp_external_storage}")
         previous = self.get_doc_before_save()
+        #if(bool(previous)):
+        #    if(bool(previous.dfp_external_storage) and not bool(self.dfp_external_storage)):
+        #        #moving from ext to local, this is NOT s3
+        #        frappe.log_error(f"DFP IS S3 FALSE - previous had ext, new one doesn't")
+        #        return True
+#
+        #    frappe.log_error(f"DFP IS s3 REMOTE FILE self.dfp_external_storage_s3_key {self.dfp_external_storage_s3_key} self.dfp_external_storage_doc {self.dfp_external_storage_doc} self.dfp_external_storage {self.dfp_external_storage} previous.dfp_external_storage {previous.dfp_external_storage}")
         if(bool(previous)):
-            if(bool(previous.dfp_external_storage) and not bool(self.dfp_external_storage)):
-                #moving from ext to local, this is NOT s3
-                frappe.log_error(f"DFP IS S3 FALSE - previous had ext, new one doesn't")
+            #local->ext
+            if (bool(self.dfp_external_storage) and not bool(previous.dfp_external_storage)):
+                frappe.log_error(f"DFP IS s3 REMOTE FILE", f"moving from local to ext, is s3 == true")
                 return True
-
-            frappe.log_error(f"DFP IS s3 REMOTE FILE self.dfp_external_storage_s3_key {self.dfp_external_storage_s3_key} self.dfp_external_storage_doc {self.dfp_external_storage_doc} self.dfp_external_storage {self.dfp_external_storage} previous.dfp_external_storage {previous.dfp_external_storage}")
-
+            #ext->local
+            elif (not bool(self.dfp_external_storage) and bool(previous.dfp_external_storage)):
+                frappe.log_error(f"DFP IS s3 REMOTE FILE", f"moving from EXT to LOCAL, treating as != s3???")
+                return False
+            #remaining on ext
+            elif (bool(self.dfp_external_storage) and bool(previous.dfp_external_storage)):
+                frappe.log_error(f"DFP IS s3 REMOTE FILE", f"remaining on EXT,treat as s3")
+                return True
+            #remianing on local
+            elif (not bool(self.dfp_external_storage) and not bool(previous.dfp_external_storage)):
+                frappe.log_error(f"DFP IS s3 REMOTE FILE", f"remaining on LOCAL, treat as NOT s3")
+                return False
         else:
-            frappe.log_error(f"DFP IS s3 REMOTE FILE self.dfp_external_storage_s3_key {self.dfp_external_storage_s3_key} self.dfp_external_storage_doc {self.dfp_external_storage_doc} self.dfp_external_storage {self.dfp_external_storage} ")
+            frappe.log_error(f"DFP IS s3 REMOTE FILE",  f"self.dfp_external_storage_s3_key {self.dfp_external_storage_s3_key} self.dfp_external_storage_doc {self.dfp_external_storage_doc} self.dfp_external_storage {self.dfp_external_storage} ")
         if self.dfp_external_storage_s3_key and self.dfp_external_storage_doc:
             #frappe.log_error(f"DFP IS S3 THINKS KEY OR DOC ARE PRESENT, SAYING THIS IS s3: self.dfp_external_storage_s3_key {self.dfp_external_storage_s3_key} self.dfp_external_storage_doc {self.dfp_external_storage_doc}")
-            frappe.log_error(f"DFP IS S3 - THIS ONE IS s3?")
+            frappe.log_error(f"DFP IS S3 - THIS ONE IS s3")
             return True
 
     def dfp_is_cacheable(self):
@@ -556,33 +572,33 @@ class DFPExternalStorageFile(File):
                 frappe.log_error(f"DFP VALIDATE moving from blank to ext, doing validate external")
                 if self.validate_external():
                     return
-                else:
-                    pass
+                #else:
+                #    pass
                     #handle external validate fail?
             #ext->local
             elif (not bool(self.dfp_external_storage) and bool(previous.dfp_external_storage)):
                 frappe.log_error(f"DFP VALIDATE moving from EXT to LOCAL, doing validate external")
                 if self.validate_external():
                     return
-                else:
-                    pass
+                #else:
+                #    pass
             #remaining on ext
             elif (bool(self.dfp_external_storage) and bool(previous.dfp_external_storage)):
                 frappe.log_error(f"DFP VALIDATE remaining on EXT, doing validate external")
                 if self.validate_external():
                     return
-                else:
-                    pass
+                #else:
+                #    pass
             #remianing on local
             elif (not bool(self.dfp_external_storage) and not bool(previous.dfp_external_storage)):
                 frappe.log_error(f"DFP VALIDATE remaining on LOCAL, doing upstream validate")
                 if super(DFPExternalStorageFile, self).validate():
                     return
-                else:
-                    error_msg = _("validation error")
-                    frappe.log_error(f"{error_msg}: {doc.file_name}")
-                    frappe.throw(error_msg)
-                    return False
+                #else:
+                #    error_msg = _("validation error")
+                #    frappe.log_error(f"{error_msg}: {doc.file_name}")
+                #    frappe.throw(error_msg)
+                #    return False
             
         else:
             return bool(self.dfp_external_storage)
