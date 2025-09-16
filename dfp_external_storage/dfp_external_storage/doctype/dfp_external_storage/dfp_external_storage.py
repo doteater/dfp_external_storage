@@ -16,9 +16,9 @@ from frappe.core.doctype.file.file import URL_PREFIXES
 from frappe.model.document import Document
 from frappe.utils.password import get_decrypted_password
 
-import jsonpickle # pip install jsonpickle
-import json
-import yaml # pip install pyyaml
+#import jsonpickle # pip install jsonpickle
+#import json
+#import yaml # pip install pyyaml
 
 
 DFP_EXTERNAL_STORAGE_PUBLIC_CACHE_PREFIX = "external_storage_public_file:"
