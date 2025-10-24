@@ -58,10 +58,23 @@ class S3FileProxy:
 	def tell(self):
 		return self.offset
 	
+#	def read(self, size=0):
+#		content = self.readFn(self.offset, size)
+#		self.offset = self.offset + len(content)
+#		return content
+
 	def read(self, size=0):
-		content = self.readFn(self.offset, size)
-		self.offset = self.offset + len(content)
-		return content
+	    # Return empty bytes if at/past EOF
+	    if self.offset >= self.file_size:
+	        return b''
+	    
+	    # Don't request more than what's available
+	    if size > 0:
+	        size = min(size, self.file_size - self.offset)
+	    
+	    content = self.readFn(self.offset, size)
+	    self.offset = self.offset + len(content)
+	    return content
 
 
 class DFPExternalStorage(Document):
