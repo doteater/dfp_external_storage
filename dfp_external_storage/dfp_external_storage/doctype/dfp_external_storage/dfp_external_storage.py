@@ -65,12 +65,12 @@ class S3FileProxy:
 
 	def read(self, size=0):
 	    # Return empty bytes if at/past EOF
-	    if self.offset >= self.file_size:
+	    if self.offset >= self.object_size:
 	        return b''
 	    
 	    # Don't request more than what's available
 	    if size > 0:
-	        size = min(size, self.file_size - self.offset)
+	        size = min(size, self.object_size - self.offset)
 	    
 	    content = self.readFn(self.offset, size)
 	    self.offset = self.offset + len(content)
