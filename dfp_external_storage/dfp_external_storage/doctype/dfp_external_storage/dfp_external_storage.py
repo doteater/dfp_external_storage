@@ -534,16 +534,26 @@ class DFPExternalStorageFile(File):
 			frappe.throw(error_msg)
 
 	def validate(self):
-		localpattern = re.compile('^\/(private|public)\/')
-		remotepattern = re.compile('^\/file\/\S{10}\/')
-		if localpattern.match(self.file_url):
-			super(DFPExternalStorageFile, self).validate()
-		elif remotepattern.match(self.file_url):
-			return True
-		else:
-			frappe.log_error(title='DFPExternalStorageFile Validate', message=f'File URL {self.file_url} is invalid')
-			frappe.throw(_("Invalid file path {0}").format(self.file_url))
-			
+	    """Validate file URL patterns for local and remote files"""
+	    if not self.file_url:
+	        super(DFPExternalStorageFile, self).validate()
+	        return
+	    
+	    # Use raw strings for cleaner regex
+	    localpattern = re.compile(r'^/(private|public)/')
+	    remotepattern = re.compile(r'^/file/\S{10}/')
+	    
+	    if localpattern.match(self.file_url):
+	        super(DFPExternalStorageFile, self).validate()
+	    elif remotepattern.match(self.file_url):
+	        # Remote files have different validation requirements
+	        pass  # or call specific remote validation if needed
+	    else:
+	        frappe.log_error(
+	            title='DFPExternalStorageFile Validate',
+	            message=f'File URL {self.file_url} does not match expected patterns'
+	        )
+	        frappe.throw(_("Invalid file path: {0}").format(self.file_url))
 
 	def check_content(self):
 		# Skip content validation for external storage files
