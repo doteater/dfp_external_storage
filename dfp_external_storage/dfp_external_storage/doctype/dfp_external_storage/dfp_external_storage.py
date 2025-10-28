@@ -556,8 +556,8 @@ class DFPExternalStorageFile(File):
 	        frappe.throw(_("Invalid file path: {0}").format(self.file_url))
 
 	def check_content(self):
-		# Skip content validation for external storage files
-	    if not self.file_url.startswith(('/private/', '/public/')):
+	    """Skip content validation for S3 remote files"""
+	    if self.dfp_is_s3_remote_file():
 	        return
 	    super(DFPExternalStorageFile, self).check_content()
 
