@@ -534,9 +534,15 @@ class DFPExternalStorageFile(File):
 			frappe.throw(error_msg)
 
 	def validate(self):
-	    """Skip disk validation for remote S3 files"""
+	    """Skip disk validation for remote S3 files or during transitions"""
+	    # If it's currently a remote file (has S3 key), skip validation
 	    if self.dfp_is_s3_remote_file():
-	        # Remote files don't exist on disk, skip file system checks
+	        return
+	    
+	    # If the URL looks like a remote URL but we don't have S3 key,
+	    # we're in a transition state - skip validation
+	    remote_pattern = re.compile(r'^/file/\S{10}/')
+	    if remote_pattern.match(self.file_url or ''):
 	        return
 	    
 	    # For local files, use standard Frappe validation
