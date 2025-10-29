@@ -241,6 +241,10 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "All"
   }
  ],
  "show_name_in_global_search": 1,
